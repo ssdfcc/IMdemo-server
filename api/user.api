@@ -1,0 +1,171 @@
+syntax = "v1"
+
+// 创建用户请求
+type CreateUserReq {
+	// 用户名
+	Name string `json:"name" validate:"regex=^\\S*$"`
+	// 密码
+	Password string `json:"password" validate:"eqfield=Repassword,regex=^\\S*$"`
+	// 确认密码
+	Repassword string `json:"repassword" validate:"regex=^\\S*$"`
+}
+
+// 修改用户请求
+type UpdateUserReq {
+	// 用户名
+	Name string `json:"name" validate:"regex=^\\S*$"`
+	// 头像
+	Avatar string `json:"avatar,default=uploads/file/default.png"`
+}
+
+// 获取用户列表请求
+type GetUserListReq {
+	// 用户名
+	Name string `form:"name,optional" json:"name,optional"`
+}
+
+// 获取用户列表响应
+type GetUserListResp {
+	// 用户列表
+	List []UserInfo `json:"list"`
+}
+
+// 用户信息
+type UserInfo {
+	// 用户id
+	ID int `json:"id"`
+	// 用户名
+	Name string `json:"name"`
+	// 电话
+	Phone string `json:"phone"`
+	// 邮箱
+	Email string `json:"email"`
+	// 头像
+	Avatar string `json:"avatar"`
+}
+
+// 用户登录
+type LoginReq {
+	// 用户名
+	Name string `json:"name" validate:"regex=^\\S*$"`
+	// 密码
+	Password string `json:"password" validate:"regex=^\\S*$"`
+}
+
+// 用户登录响应
+type LoginResp {
+	// token
+	Token string `json:"token"`
+	// 过期时间
+	ExpiresAt int64 `json:"expiresAt"`
+}
+
+// 文件上传请求
+type UploadReq{
+	Hash string `json:"hash,optional"`
+	Name string `json:"name,optional"`
+	Ext  string `json:"ext,optional"`
+	Size int64  `json:"size,optional"`
+	Path string `json:"path,optional"`
+}
+
+//文件上传响应
+type UploadResp{
+	ID int `json:"id"`
+	Name string `json:"name"`
+	Ext  string `json:"ext"`
+	Size int64  `json:"size"`
+	Path string `json:"path"`
+}
+// 获取缓存消息列表请求
+type GetRedisMsgListReq {
+	// id
+	ID int `json:"id" validate:"gt=0"`
+	// 类型 1私聊 2群聊
+	Type int `json:"type" validate:"oneof=1 2"`
+	// 偏移量
+	Offset int64 `json:"offset" validate:"gte=10"`
+}
+
+// 获取缓存消息列表相应
+type GetRedisMsgListResp {
+	// 消息列表
+	List []MsgInfo `json:"list"`
+}
+// 消息信息
+type MsgInfo {
+	// 发送者id
+	UserID int `json:"userId"`
+	// 接收者id
+	TargetId int `json:"targetId"`
+	// 消息内容
+	Content string `json:"content"`
+	// 消息类型 1私聊 2群聊
+	Type int `json:"type"`
+	// 消息类型 1文本 2图片 3音频 4视频
+	Media int `json:"media"`
+	// 地址
+	Url string `json:"url,omitempty"`
+}
+
+// 获取群人员列表响应
+type GetGroupUserListResp {
+	// 群成员列表
+	List []UserInfo `json:"list"`
+}
+
+@server(
+	group: user
+)
+service go-zero-chat {
+	// 用户登录
+	@handler LoginHandler
+	post /user/login (LoginReq) returns (LoginResp)
+	// 创建用户
+	@handler CreateUserHandler
+	post /user/createUser (CreateUserReq)
+}
+@server(
+	group : user
+	middleware : Authority
+)
+service go-zero-chat {
+	// 退出登录
+	@handler logout
+	post /user/logout
+	// 获取用户自身信息
+	@handler GetUserInfo
+	get /user/getUserInfo returns (UserInfo)
+	// 删除用户
+	@handler DeleteUserHandler
+	delete /user/deleteUser (IDReq)
+	// 修改用户
+	@handler UpdateUserHandler
+	post /user/updateUser (UpdateUserReq) returns (UserInfo)
+	// 获取用户列表
+	@handler GetUserListHandler
+	get /user/getUserList (GetUserListReq) returns (GetUserListResp)
+	// 文件上传
+	@handler UploadHandler
+	post /user/upload (UploadReq) returns (UploadResp)
+	// 获取历史消息
+	@handler GetRedisMsgListHandler
+	post /user/getRedisMsgList (GetRedisMsgListReq) returns (GetRedisMsgListResp)
+	// 获取群人员列表
+	@handler GetGroupUserListHandler
+	post /user/getGroupUserList (IDReq) returns (GetGroupUserListResp)
+}
+
+@server(
+	group : user
+	middleware : AuthorityQuery
+)
+
+service go-zero-chat {
+	// 用户发送消息
+	@handler SendMsgHandler
+	get /user/sendMsg
+	// 用户发送消息
+	@handler SendUserMsgHandler
+	get /user/sendUserMsg
+}

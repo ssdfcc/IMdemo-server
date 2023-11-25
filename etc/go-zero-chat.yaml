@@ -1,0 +1,39 @@
+Name: go-zero-chat
+Host: 0.0.0.0
+Port: 8081
+
+# 数据库配置
+DatabaseConf:
+  Type: postgres
+  Host: 127.0.0.1
+  Port: 5432
+  DBName: go-zero-chat
+  Username: postgres
+  Password: admin123
+  MaxOpenConn: 100
+  SSLMode: disable
+  CacheTime: 5
+  PGConfig: TimeZone=Asia/Shanghai
+# Redis配置
+RedisConf:
+  Host: 127.0.0.1:6379
+  Type: node
+# JWT配置
+Auth:
+  AccessSecret: 300dc233-6227-4224-a5c6-180e0ss397e1
+  AccessExpire: 604800
+  RefreshTime: 86400
+# 多点登录拦截
+MultiSignOnBlocking:
+  Type: true
+# 日志配置
+Log:
+  ServiceName: go-zero-chat-logger
+  Mode: file
+  Level: info
+  Compress: false
+  KeepDays: 7
+  StackCoolDownMillis: 100
+# 文件上传路径
+Local:
+  Path: uploads

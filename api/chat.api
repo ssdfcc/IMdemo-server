@@ -1,0 +1,12 @@
+syntax = "v1"
+
+@server(
+    group : chat
+    middleware : AuthorityQuery
+)
+
+service go-zero-chat {
+    // 用户发送消息
+    @handler ChatHandler
+    get /chat
+}

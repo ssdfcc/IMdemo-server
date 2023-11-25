@@ -1,0 +1,65 @@
+syntax = "v1"
+
+// 人员关系列表响应
+type SearchFriendResp {
+    // 总条数
+    Total int `json:"total"`
+    // 好友列表
+    List []FrientInfo `json:"list"`
+}
+
+type FrientInfo {
+    ID int `json:"id"`
+    // 用户名
+    Name string `json:"name"`
+    // 头像
+    Avatar string `json:"avatar"`
+}
+
+// 人员关系列表响应
+type SearchGroupResp {
+    // 总条数
+    Total int `json:"total"`
+    // 群列表
+    List []GroupInfo `json:"list"`
+}
+
+type GroupInfo {
+    ID int `json:"id"`
+    // 群名称
+    Name string `json:"name"`
+    // 群头像
+    Img string `json:"img"`
+    // 群成员数量
+    MemberCount int `json:"memberCount"`
+}
+
+
+// 创建群请求
+type CreateGroupReq {
+    // 群名
+    Name string `json:"name" validate:"regex=^\\S*$"`
+    Img string `json:"img,default=uploads/file/default.png,optional"`
+}
+
+@server(
+    group : contact
+    middleware : Authority
+)
+service go-zero-chat {
+    // 获取好友列表
+    @handler SearchFriendHandler
+    get /contact/searchFriend returns (SearchFriendResp)
+    // 获取群列表
+    @handler SearchGroupHandler
+    get /contact/searchGroup returns (SearchGroupResp)
+    // 添加好友
+    @handler AddFriendHandler
+    post /contact/addFriend (IDReq)
+    // 创建群
+    @handler CreateGroupHandler
+    post /contact/createGroup (CreateGroupReq)
+    // 添加群
+    @handler AddGroupHandler
+    post /contact/addGroup (IDReq)
+}
